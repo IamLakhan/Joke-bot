@@ -20,14 +20,20 @@ def get_meme():
 	return str((data['url']))
 
 def get_corona_update():
-	url = 'https://api.covid19india.org/data.json?'
-	response = requests.get(url)
+	url = 'https://api.rootnet.in/covid19-in/stats/latest'
+	response = requests.get(url, headers = {'Accept': 'application/json'})
+	data = response.json() 
+	total = data['data']['summary']['total']
+	death = data['data']['summary']['deaths']
+	recover = data['data']['summary']['discharged']
+	active = total - recover - death
+	return (f"Total cases : {total} \nDeaths: {death} \nRecovered : {recover} \nActive: {active} \nLast Updated: {data['lastRefreshed']}")
+
+def insults():
+	url = 'https://evilinsult.com/generate_insult.php?lang=en&type=json'
+	response = requests.get(url, headers = {'Accept': 'application/json'})
 	data = response.json()
-	active = str(int(data["statewise"][0]["active"]))
-	confirmed = str(int(data["statewise"][0]["confirmed"]))
-	deaths =  str(int(data["statewise"][0]["deaths"]))
-	message = "Cofirmed cases:" + confirmed + "active:" + active + "deaths:" + deaths
-	return(str(message))
+	return str((data['insult']))
 
 @bot.event
 async def on_ready():
@@ -37,22 +43,23 @@ async def on_ready():
 async def on_message(message):
 	channel = message.channel
 	content = message.content
-	if content == '.joke':
+	if content == '!joke':
 		joke = tell_joke()
 		await channel.send(joke)
 	
 	if content.lower() == 'go corona':
 		await channel.send('Corona Go!')
 
-	if content == '.meme':
+	if content == '!meme':
 		meme = get_meme()
 		await channel.send(meme)
 		
-	if content == '.corona':
+	if content == '!corona':
 		update = get_corona_update()
 		await channel.send(update)
+	
+	if content == '!insult':
+		insult = insults()
+		await channel.send(insult)
 		
-		
-
 bot.run(TOKEN)
-
